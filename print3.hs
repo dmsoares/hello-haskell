@@ -6,7 +6,7 @@ myGreeting = "hello" ++ " world!"
 hello :: [Char]
 hello = "hello"
 
-world :: [Char]
+world :: String
 world = "world!"
 
 main :: IO ()

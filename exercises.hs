@@ -34,3 +34,7 @@ waxOn = x * 5
 triple x = x * 3
 
 waxOff x = (*) (triple $ x + 10) 10
+
+-- Scope
+area d = pi * (r * r)
+  where r = d / 2
