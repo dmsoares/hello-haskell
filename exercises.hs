@@ -38,3 +38,16 @@ waxOff x = (*) (triple $ x + 10) 10
 -- Scope
 area d = pi * (r * r)
   where r = d / 2
+
+
+-- Simple operations with text
+-- 2.
+
+func7 :: String -> String
+func7 str = str ++ "!"
+
+func8 :: String -> String
+func8 str = [str !! 4]
+
+func9 :: String -> String
+func9 str = drop 9 str
