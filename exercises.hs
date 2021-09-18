@@ -51,3 +51,38 @@ func8 str = [str !! 4]
 
 func9 :: String -> String
 func9 str = drop 9 str
+
+-- 3.
+
+thirdLetter :: String -> Char
+thirdLetter str = str !! 2
+
+-- 4.
+
+nthLetter :: Int -> Char
+nthLetter n = "Curry is awesome!" !! subtract 1 n
+
+-- 5.
+
+rvrs :: String -> String
+rvrs str = first ++ " " ++ second ++ " " ++ third
+  where first = drop 9 str
+        second = drop 6 $ take 8 str
+        third = take 5 str
+
+-- ch. 4
+-- Correcting syntax
+
+-- 1.
+
+x = (+)
+f xs = x w 1
+  where w = length xs
+
+-- 2.
+
+myId x = x -- not if this is what was intended...
+
+-- 3.
+
+t (a, b) = a
