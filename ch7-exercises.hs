@@ -85,3 +85,35 @@ numbers x
   | x < 0 = -1
   | x == 0 = 0
   | x > 0 = 1
+
+
+-- Let's write code
+-- 1.
+tensDigit :: Integral a => a -> a
+tensDigit x = d
+  where xLast = x `div` 10
+        d = xLast `mod` 10
+
+-- a)
+tensDigit' :: Integral a => a -> a
+tensDigit' = snd . (`divMod` 10) . fst . (`divMod` 10)
+
+-- c)
+xDigit x = snd . (`divMod` 10) . fst . (`divMod` x)
+hunsD = xDigit 100
+
+-- 2.
+foldBool1 :: a -> a -> Bool -> a
+foldBool1 x y z =
+  case z of
+    False -> x
+    True -> y
+
+foldBool2 :: a -> a -> Bool -> a
+foldBool2 x y z
+  | z = y
+  | otherwise = x
+
+-- 3.
+g :: (a -> c) -> (a, b) -> (c, b)
+g f (x, y) = (f x, y)
