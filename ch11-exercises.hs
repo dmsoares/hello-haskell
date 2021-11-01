@@ -44,3 +44,45 @@ areCars = map isCar
 getManu :: Vehicle -> Manufacturer
 getManu (Car manu _) = manu
 getManu _ = None
+
+-- Programmers
+
+data OperatingSystem =
+    GnuPlusLinux
+  | OpenBSDPlusNevermindJustBSDStill
+  | Mac
+  | Windows
+  deriving (Eq, Show)
+
+data ProgLang =
+    Haskell
+  | Agda
+  | Idris
+  | PureScript
+  deriving (Eq, Show)
+
+data Programmer =
+  Programmer { os :: OperatingSystem
+             , lang :: ProgLang }
+  deriving (Eq, Show)
+
+allOperatingSystems :: [OperatingSystem]
+allOperatingSystems =
+  [ GnuPlusLinux
+  , OpenBSDPlusNevermindJustBSDStill
+  , Mac
+  , Windows
+  ]
+
+allLanguages :: [ProgLang]
+allLanguages =
+  [ Haskell
+  , Agda
+  , Idris
+  , PureScript
+  ]
+
+allProgrammers :: [Programmer]
+allProgrammers = getProgrammers allOperatingSystems allLanguages
+  where getProgrammers oss langs =
+          [Programmer {os = x', lang = y'} | x' <- oss, y' <- langs]

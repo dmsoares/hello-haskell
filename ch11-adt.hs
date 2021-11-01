@@ -107,3 +107,41 @@ data Animal =
 type Animal' = Sum CowInfo (Sum PigInfo SheepInfo)
 
 shaun = Second $ Second $ SheepInfo "Shaun" 3 1 :: Animal'
+
+-- Constructing values
+-- Nullary
+trivialValue :: GuessWhat
+trivialValue = Chickenbutt
+
+-- Unary
+idInt :: Id Integer
+idInt = MkId 10
+
+-- Product
+type Awesome = Bool
+-- type Name = String
+
+person :: Product Name Awesome
+person = Product "Simon" True
+
+-- Sum
+data Twitter =
+  Twitter deriving (Eq, Show)
+
+data AskFm =
+  AskFm deriving (Eq, Show)
+
+socialNetwork :: Sum Twitter AskFm
+socialNetwork =  First Twitter
+
+-- Record
+myRecord :: RecordProduct Integer Float
+myRecord = RecordProduct 42 0.00001  -- here, accessors can also be used to retrieve values
+
+myRecord' :: RecordProduct Integer Float
+myRecord' = RecordProduct { pfirst = 42
+                          , psecond = 0.00001 }
+
+myRecord'' :: RecordProduct Integer Float
+myRecord'' = RecordProduct { psecond = 0.00001 -- record syntax means we can reorder stuff
+                           , pfirst = 42 }
