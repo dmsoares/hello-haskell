@@ -86,3 +86,23 @@ allProgrammers :: [Programmer]
 allProgrammers = getProgrammers allOperatingSystems allLanguages
   where getProgrammers oss langs =
           [Programmer {os = x', lang = y'} | x' <- oss, y' <- langs]
+
+-- !! it's very important not to propagate bottoms when dealing with record syntax:
+
+johnnyProg = Programmer { os = GnuPlusLinux} -- this will lead to runtime errors!!
+
+-- if a Product type value needs to be constructed without all values,
+-- follow the strategy below. "Percolate values, not bottoms!"
+
+data ThereYet =
+  There Float Int Bool
+  deriving (Eq, Show)
+
+notYet :: Int -> Bool -> ThereYet
+notYet = There 25.5
+
+notQuite :: Bool -> ThereYet
+notQuite = notYet 10
+
+yussss :: ThereYet
+yussss = notQuite False

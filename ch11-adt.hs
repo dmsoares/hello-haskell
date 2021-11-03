@@ -145,3 +145,111 @@ myRecord' = RecordProduct { pfirst = 42
 myRecord'' :: RecordProduct Integer Float
 myRecord'' = RecordProduct { psecond = 0.00001 -- record syntax means we can reorder stuff
                            , pfirst = 42 }
+
+-- Deconstructing values
+newtype Name' = Name' String deriving Show
+newtype Acres = Acres Int deriving Show
+
+data FarmerType = DairyFarmer
+                | WheatFarmer
+                | SoybeanFarmer
+                deriving Show
+
+data Farmer =
+  Farmer Name' Acres FarmerType
+  deriving Show
+
+isDairyFarmer :: Farmer -> Bool
+isDairyFarmer (Farmer _ _ DairyFarmer) = True
+isDairyFarmer _ = False
+
+-- ...with record syntax
+data FarmerRec =
+  FarmRec { name' :: Name
+          , acres :: Acres
+          , farmerType :: FarmerType }
+          deriving Show
+
+isDairyFarmerRec :: FarmerRec -> Bool
+isDairyFarmerRec farmer =
+  case farmerType farmer of
+    DairyFarmer ->  True
+    _           -> False
+
+-- !! once again, do not propagate bottoms !!
+-- don't do this:
+-- data Automobile = Null
+--                 | Automobile { make :: String
+--                              , model :: String }
+-- the above can lead to using accessors in places where
+-- the Null value is being given. The compiler won't
+-- complain, leading to a runtime error.
+-- Below is a possible solution (but be advised that
+-- the use of a Null value is not recommended: use Maybe instead).
+
+data Car = Car { make :: String
+               , model :: String }
+               deriving (Eq, Show)
+
+data Automobile = Null
+                | Automobile Car
+                deriving (Eq, Show)
+
+getMake :: Automobile -> String
+getMake (Automobile c) = make c
+getMake _ = ""
+
+make' = getMake Null
+
+-- Function type as exponentiation
+data Quantum =
+    Yes
+  | No
+  | Both
+  deriving (Eq, Show)
+
+convert :: Quantum -> Bool
+convert Yes = True
+convert _ = False
+
+convert2 :: Quantum -> Bool
+convert2 No = True
+convert2 _ = False
+
+convert3 :: Quantum -> Bool
+convert3 Both = True
+convert3 _ = False
+
+convert4 :: Quantum -> Bool
+convert4 Yes = False
+convert4 _ = True
+
+convert5 :: Quantum -> Bool
+convert5 No = False
+convert5 _ = True
+
+convert6 :: Quantum -> Bool
+convert6 Both = False
+convert6 _ = True
+
+convert7 :: Quantum -> Bool
+convert7 _ = True
+
+convert8 :: Quantum -> Bool
+convert8 _ = False
+
+-- Binary Trees
+data BinaryTree a =
+    Leaf
+  | Node (BinaryTree a) a (BinaryTree a)
+  deriving (Eq, Show)
+
+insert' :: Ord a
+           => a
+           -> BinaryTree a
+           -> BinaryTree a
+insert' b Leaf = Node Leaf b Leaf
+insert' b (Node l v r)
+  | b == v = Node l v r
+  | b < v = Node (insert' b l) v r
+  | b > v = Node l v (insert' b r)
