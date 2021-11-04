@@ -2,6 +2,8 @@
 
 module Ch11Exercises where
 
+import Data.Char
+
 -- Exercises: Vehicles
 
 data Price = Price Integer deriving (Eq, Show)
@@ -106,3 +108,55 @@ notQuite = notYet 10
 
 yussss :: ThereYet
 yussss = notQuite False
+
+-- Chapter Exercises
+-- Ciphers
+cipher :: String -> String -> String
+cipher xs w =
+  go xs w f 0 where
+  go [] _ _ _ = []
+  go (x:xs) w f c = f x w c : go xs w f (c + 1)
+  f x w c = chr $ ord x + (ord (toUpper $ w !! mod c (length w)) - ord 'A')
+
+decipher :: String -> String -> String
+decipher xs w =
+  go xs w f 0 where
+  go [] _ _ _ = []
+  go (x:xs) w f c = f x w c : go xs w f (c + 1)
+  f x w c = chr $ ord x - (ord (toUpper $ w !! mod c (length w)) - ord 'A')
+
+-- As-patterns
+-- 1.
+isSubseqOf :: (Eq a)
+           => [a]
+           -> [a]
+           -> Bool
+isSubseqOf [] _ = True
+isSubseqOf _ [] = False
+isSubseqOf a@(x:xs) b@(y:ys)
+  | x /= y = isSubseqOf a ys
+  | x == y = isSubseqOf xs ys
+
+-- 2.
+capitalizeWords :: String
+                -> [(String, String)]
+capitalizeWords = map caps . words
+  where
+    caps w@(x:xs) = (w, toUpper x : xs)
+
+-- Language exercises
+-- 1.
+capitalizeWord :: String -> String
+capitalizeWord w@(x:xs) = toUpper x : xs
+
+-- 2.
+capitalizeParagraph :: String -> String
+capitalizeParagraph [] = []
+capitalizeParagraph p =
+  capitalizeWord (take n p) ++ capitalizeParagraph (drop n p)
+    where
+      n = go p 0
+      go [] c = c
+      go (x:xs) c
+        | x == '.' = c + 2
+        | otherwise = go xs (c + 1)
