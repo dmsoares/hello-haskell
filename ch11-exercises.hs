@@ -1,4 +1,4 @@
--- |
+
 
 module Ch11Exercises where
 
@@ -160,3 +160,72 @@ capitalizeParagraph p =
       go (x:xs) c
         | x == '.' = c + 2
         | otherwise = go xs (c + 1)
+
+-- Phone exercise
+-- 1.
+newtype DaPhone = DaPhone [(Char, String)]
+             deriving (Eq, Show)
+
+daPhone = DaPhone [ ('0', " 0")
+                  , ('1', "1")
+                  , ('2', "ABC2")
+                  , ('3', "DEF3")
+                  , ('4', "GHI4")
+                  , ('5', "JKL5")
+                  , ('6', "MNO6")
+                  , ('7', "PQRS7")
+                  , ('8', "TUV8")
+                  , ('9', "WXYZ9")
+                  , ('*', "^")
+                  , ('#', ".,") ]
+
+-- 2.
+convo :: [String]
+convo =
+  [ "Wanna play 20 questions"
+  , "Ya"
+  , "U 1st haha"
+  , "Lol ok. Have u ever tasted alcohol"
+  , "Lol ya"
+  , "Wow ur cool haha. Ur turn"
+  , "Ok. Do u think I am pretty Lol"
+  , "Lol ya"
+  , "Just making sure rofl ur turn" ]
+
+-- validButtons = "1234567890*#"
+type Digit = Char
+
+-- Valid presses: 1 and up
+type Presses = Int
+
+reverseTaps :: DaPhone
+            -> Char
+            -> [(Digit, Presses)]
+reverseTaps (DaPhone ks) c =
+  if isUpper c
+  then ('*', 1) : [(fst t, n)]
+  else [(fst t, n)]
+    where
+      t = head $ filter (\(f,s) -> toUpper c `elem` s) ks
+      n = 1 + length (takeWhile (/= toUpper c) (snd t))
+
+cellPhonesDead :: DaPhone
+               -> String
+               -> [(Digit, Presses)]
+cellPhonesDead daPhone = concatMap $ reverseTaps daPhone
+
+-- 3.
+fingerTaps :: [(Digit, Presses)] -> Presses
+fingerTaps = foldr (\(a1, a2) b -> a2 + b) 0
+
+-- 4.
+mostPopularLetter :: String -> Char
+mostPopularLetter string = head $ fst $ foldr f (" ", 0) string
+  where f x t@(a,b)
+          | x == head a = t
+          | otherwise =
+            if n >= b
+            then ([x],n)
+            else t
+          where n =
+                  length $ filter (== x) string
