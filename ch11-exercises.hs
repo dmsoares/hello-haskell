@@ -3,6 +3,7 @@
 module Ch11Exercises where
 
 import Data.Char
+import Data.List
 
 -- Exercises: Vehicles
 
@@ -219,13 +220,18 @@ fingerTaps :: [(Digit, Presses)] -> Presses
 fingerTaps = foldr (\(a1, a2) b -> a2 + b) 0
 
 -- 4.
+mostPopular :: Ord a => [a] -> a
+mostPopular = head . last . sortOn length . group . sort
+
 mostPopularLetter :: String -> Char
-mostPopularLetter string = head $ fst $ foldr f (" ", 0) string
-  where f x t@(a,b)
-          | x == head a = t
-          | otherwise =
-            if n >= b
-            then ([x],n)
-            else t
-          where n =
-                  length $ filter (== x) string
+mostPopularLetter = mostPopular . filter (\c -> c `notElem` " .,")
+
+cost :: DaPhone -> Char -> Int
+cost p = fingerTaps . reverseTaps p
+
+-- 5.
+coolestLtr :: [String] -> Char
+coolestLtr = mostPopularLetter . concat
+
+coolestWord :: [String] -> String
+coolestWord = mostPopular . words . concat
