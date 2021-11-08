@@ -8,7 +8,6 @@ module Ch12Exercises where
 
 -- String processing
 -- 1.
-import Data.Maybe (isNothing)
 notThe :: String -> Maybe String
 notThe word =
   if word == "the"
@@ -27,7 +26,7 @@ countTheBeforeVowel :: String -> Integer
 countTheBeforeVowel = count . words
   where
     count (w0:rest@(w1:ws)) =
-      if isNothing (notThe w0) && head w1 `elem` "aeiou"
+      if isNothing (notThe w0) && head w1 `elem` "aeiou" -- see isNothing definition in exercise below
       then (+1) $ count rest
       else count rest
     count _ = 0
@@ -81,3 +80,46 @@ integerToNat i
   where
     go 0 = Zero
     go i = Succ (go $ i - 1)
+
+-- Small library for Maybe
+-- 1.
+isJust :: Maybe a -> Bool
+isJust (Just _) = True
+isJust Nothing = False
+
+isNothing :: Maybe a -> Bool
+isNothing (Just _) = False
+isNothing Nothing = True
+
+-- 2.
+mayybee :: b -> (a -> b) -> Maybe a -> b
+mayybee b _ Nothing = b
+mayybee _ f (Just a) = f a
+
+-- 3.
+fromMaybe :: a -> Maybe a -> a
+fromMaybe b = mayybee b id
+
+-- 4.
+listToMaybe :: [a] -> Maybe a
+listToMaybe [] = Nothing
+listToMaybe (x:xs) = Just x
+
+maybeToList :: Maybe a -> [a]
+maybeToList Nothing = []
+maybeToList (Just a) = [a]
+
+-- 5.
+catMaybes :: [Maybe a] -> [a]
+--catMaybes = map (\(Just a) -> a) . filter isJust
+catMaybes = foldr f []
+  where
+    f Nothing b = b
+    f (Just a) b = a : b
+
+-- 6.
+flipMaybe :: [Maybe a] -> Maybe [a]
+flipMaybe ms =
+  if any isNothing ms
+  then Nothing
+  else Just (map (\(Just a) -> a) ms)
