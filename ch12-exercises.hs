@@ -8,6 +8,7 @@ module Ch12Exercises where
 
 -- String processing
 -- 1.
+import Data.Either (partitionEithers)
 notThe :: String -> Maybe String
 notThe word =
   if word == "the"
@@ -123,3 +124,47 @@ flipMaybe ms =
   if any isNothing ms
   then Nothing
   else Just (map (\(Just a) -> a) ms)
+
+-- Small library for Either
+-- 1.
+lefts' :: [Either a b] -> [a]
+lefts' = foldr f []
+  where
+    f (Left a) acc = a : acc
+    f (Right _) acc = acc
+
+-- 2.
+rights' :: [Either a b] -> [b]
+rights' = foldr f []
+  where
+    f (Left _) acc = acc
+    f (Right b) acc = b : acc
+
+-- 3.
+partitionEithers' :: [Either a b]
+                  -> ([a], [b])
+partitionEithers' = foldr f ([],[])
+  where
+    f (Left a) (as, bs) = (a:as, bs)
+    f (Right b) (as, bs) = (as, b:bs)
+
+-- 4.
+eitherMaybe' :: (b -> c)
+             -> Either a b
+             -> Maybe c
+eitherMaybe' _ (Left _) = Nothing
+eitherMaybe' f (Right b)= Just $ f b
+
+-- 5.
+either' :: (a -> c)
+        -> (b -> c)
+        -> Either a b
+        -> c
+either' f _ (Left a) = f a
+either' _ g (Right b) = g b
+
+-- 6.
+eitherMaybe'' :: (b -> c)
+              -> Either a b
+              -> Maybe c
+eitherMaybe'' f = either' (const Nothing) (Just . f)
