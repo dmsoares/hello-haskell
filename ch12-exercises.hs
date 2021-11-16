@@ -168,3 +168,45 @@ eitherMaybe'' :: (b -> c)
               -> Either a b
               -> Maybe c
 eitherMaybe'' f = either' (const Nothing) (Just . f)
+
+-- Unfold
+-- 1.
+myIterate :: (a  -> a) -> a -> [a]
+myIterate f a = a : myIterate f (f a)
+
+-- 2.
+myUnfoldr :: (b -> Maybe (a, b))
+          -> b
+          -> [a]
+myUnfoldr f b
+  | isNothing $ f b = []
+  | otherwise = (fst $ t $ f b) : myUnfoldr f (snd $ t $ f b)
+    where t (Just x) = x
+
+-- 3.
+betterIterate :: (a -> a) -> a -> [a]
+betterIterate f = myUnfoldr (\b -> Just (b, f b))
+
+-- Binary Trees
+data BinaryTree a =
+    Leaf
+  | Node (BinaryTree a) a (BinaryTree a)
+  deriving (Eq, Ord, Show)
+
+-- 1.
+unfold :: (a -> Maybe (a, b, a))
+       -> a
+       -> BinaryTree b
+unfold f a
+  | isNothing $ f a = Leaf
+  | otherwise = Node (unfold f x) y (unfold f z)
+  where
+    t = (\(Just t) -> t) $ f a
+    x = (\(x, _, _) -> x) t
+    y = (\(_, y, _) -> y) t
+    z = (\(_, _, z) -> z) t
+
+-- 2.
+treeBuild :: Integer -> BinaryTree Integer
+treeBuild n = unfold f 0
+  where f x = if x == n then Nothing else Just (x+1, x, x+1)
