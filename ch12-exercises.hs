@@ -209,4 +209,4 @@ unfold f a
 -- 2.
 treeBuild :: Integer -> BinaryTree Integer
 treeBuild n = unfold f 0
-  where f x = if x == n then Nothing else Just (x+1, x, x+1)
+  where f x = if x == n then Nothing else Just (x + 1, x, x + 1)
