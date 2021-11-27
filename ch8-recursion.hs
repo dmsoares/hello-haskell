@@ -73,6 +73,11 @@ m n1 n2 = go n1 n2 0
           | x == 0 = r
           | otherwise = go (x - 1) y (r + y)
 
+multiply :: (Eq a, Num a) => a -> a -> a
+multiply 0 _ = 0
+multiply _ 0 = 0
+multiply x y = y + multiply (x - 1) y
+
 -- Fixing dividedBy
 dividedBy :: (Integral a) => a -> a -> (a, a)
 dividedBy num denom = go num denom 0
