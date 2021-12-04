@@ -149,6 +149,7 @@ capitalizeWords = map caps . words
 -- 1.
 capitalizeWord :: String -> String
 capitalizeWord (x:xs) = toUpper x : xs
+capitalizeWord [] = []
 
 -- 2.
 capitalizeParagraph :: String -> String
