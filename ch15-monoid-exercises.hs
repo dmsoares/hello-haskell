@@ -5,36 +5,36 @@ import           Test.QuickCheck.Arbitrary
 
 main :: IO ()
 main = do
-  quickCheck (semigroupAssoc :: TrivAssoc)
+  quickCheck (monoidAssoc :: TrivAssoc)
   quickCheck (monoidLeftIdentity :: Trivial -> Bool)
   quickCheck (monoidRightIdentity :: Trivial -> Bool)
-  quickCheck (semigroupAssoc :: IdentAssoc String)
+  quickCheck (monoidAssoc :: IdentAssoc String)
   quickCheck (monoidLeftIdentity :: Identity String -> Bool)
   quickCheck (monoidRightIdentity :: Identity String -> Bool)
-  quickCheck (semigroupAssoc :: TwoAssoc String String)
+  quickCheck (monoidAssoc :: TwoAssoc String String)
   quickCheck (monoidLeftIdentity :: Two String String -> Bool)
   quickCheck (monoidRightIdentity :: Two String String -> Bool)
 
-semigroupAssoc ::
-  (Eq m, Semigroup m) =>
+monoidAssoc ::
+  (Eq m, Monoid m) =>
   m ->
   m ->
   m ->
   Bool
-semigroupAssoc a b c =
-  (a <> (b <> c)) == ((a <> b) <> c)
+monoidAssoc a b c =
+  (a `mappend` (b `mappend` c)) == ((a `mappend` b) `mappend` c)
 
 monoidLeftIdentity ::
   (Eq m, Monoid m) =>
   m ->
   Bool
-monoidLeftIdentity a = (mempty <> a) == a
+monoidLeftIdentity a = (mempty `mappend` a) == a
 
 monoidRightIdentity ::
   (Eq m, Monoid m) =>
   m ->
   Bool
-monoidRightIdentity a = (a <> mempty) == a
+monoidRightIdentity a = (a `mappend` mempty) == a
 
 -- 1.
 data Trivial = Trivial deriving (Eq, Show)
@@ -85,3 +85,7 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
 
 type TwoAssoc a b =
   Two a b -> Two a b -> Two a b -> Bool
+
+-- 4.
+newtype BoolConj
+  = BoolConj Bool
