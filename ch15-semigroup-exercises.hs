@@ -2,7 +2,7 @@ module Ch15SemigroupExercises where
 
 import           Data.IntMap     (compose)
 import           Data.Semigroup  (Product, Semigroup)
-import           Test.QuickCheck
+import           Test.QuickCheck hiding (Failure, Success)
 
 -- 1.
 data Trivial = Trivial deriving (Eq, Show)
@@ -37,6 +37,16 @@ main = do
   quickCheck (semigroupAssoc :: OrAssoc String String)
   quickCheck (combSemigroupAssoc :: CombAssoc Int (Product Int))
   quickCheck (compSemigroupAssoc :: CompAssoc Int)
+  quickCheck (semigroupAssoc :: ValAssoc String Int)
+
+  let failure :: String -> Validation String Int
+      failure = Failure
+      success :: Int -> Validation String Int
+      success = Success
+  print $ success 1 <> failure "blah"
+  print $ failure "woot" <> failure "blah"
+  print $ success 1 <> success 2
+  print $ failure "woot" <> success 2
 
 -- 2.
 newtype Identity a = Identity a deriving (Eq, Show)
@@ -226,3 +236,26 @@ compSemigroupAssoc f g h a =
 
 type CompAssoc a =
   Comp a -> Comp a -> Comp a -> a -> Bool
+
+-- 11.
+data Validation a b
+  = Failure a
+  | Success b
+  deriving (Eq, Show)
+
+instance
+  Semigroup a =>
+  Semigroup (Validation a b)
+  where
+  (Success b) <> _            = Success b
+  (Failure a) <> (Success b)  = Success b
+  (Failure a) <> (Failure a') = Failure (a <> a')
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Validation a b) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    oneof [return (Failure a), return (Success b)]
+
+type ValAssoc a b =
+  Validation a b -> Validation a b -> Validation a b -> Bool
