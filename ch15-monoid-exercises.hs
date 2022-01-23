@@ -20,6 +20,9 @@ main = do
   quickCheck (monoidAssoc :: BoolDisjAssoc)
   quickCheck (monoidLeftIdentity :: BoolDisj -> Bool)
   quickCheck (monoidRightIdentity :: BoolDisj -> Bool)
+  quickCheck (monoidCombAssoc :: CombAssoc String String)
+  quickCheck (monoidCombLeftIdentity :: Combine String String -> String -> Bool)
+  quickCheck (monoidCombRightIdentity :: String -> Combine String String -> Bool)
 
 monoidAssoc ::
   (Eq m, Monoid m) =>
@@ -132,3 +135,50 @@ instance Arbitrary BoolDisj where
 
 type BoolDisjAssoc =
   BoolDisj -> BoolDisj -> BoolDisj -> Bool
+
+-- 6.
+newtype Combine a b = Combine {unCombine :: (a -> b)}
+
+instance Show (Combine a b) where
+  show _ = "Combine"
+
+instance Semigroup b => Semigroup (Combine a b) where
+  (Combine f) <> (Combine g) = Combine (\a -> f a <> g a)
+
+instance Monoid b => Monoid (Combine a b) where
+  mempty = Combine (const mempty)
+  mappend = (<>)
+
+instance (CoArbitrary a, Arbitrary b) => Arbitrary (Combine a b) where
+  arbitrary = do
+    f <- arbitrary
+    return $ Combine f
+
+type CombAssoc a b =
+  Combine a b -> Combine a b -> Combine a b -> a -> Bool
+
+monoidCombAssoc ::
+  (Eq b, Monoid b) =>
+  Combine a b ->
+  Combine a b ->
+  Combine a b ->
+  a ->
+  Bool
+monoidCombAssoc f g h a =
+  unCombine (f <> g <> h) a == unCombine (f <> (g <> h)) a
+
+monoidCombLeftIdentity ::
+  (Eq b, Monoid b) =>
+  Combine a b ->
+  a ->
+  Bool
+monoidCombLeftIdentity (Combine f) a =
+  unCombine (mempty `mappend` (Combine f)) a == unCombine (Combine f) a
+
+monoidCombRightIdentity ::
+  (Eq b, Monoid b) =>
+  a ->
+  Combine a b ->
+  Bool
+monoidCombRightIdentity a (Combine f) =
+  unCombine ((Combine f) `mappend` mempty) a == unCombine (Combine f) a
