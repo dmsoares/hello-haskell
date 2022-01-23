@@ -5,12 +5,12 @@ import           Test.QuickCheck.Arbitrary
 
 main :: IO ()
 main = do
-  let sa = semigroupAssoc
-      mli = monoidLeftIdentity
-      mlr = monoidRightIdentity
-  quickCheck (sa :: TrivAssoc)
-  quickCheck (mli :: Trivial -> Bool)
-  quickCheck (mlr :: Trivial -> Bool)
+  quickCheck (semigroupAssoc :: TrivAssoc)
+  quickCheck (monoidLeftIdentity :: Trivial -> Bool)
+  quickCheck (monoidRightIdentity :: Trivial -> Bool)
+  quickCheck (semigroupAssoc :: IdentAssoc String)
+  quickCheck (monoidLeftIdentity :: Identity String -> Bool)
+  quickCheck (monoidRightIdentity :: Identity String -> Bool)
 
 semigroupAssoc ::
   (Eq m, Semigroup m) =>
@@ -41,10 +41,26 @@ instance Semigroup Trivial where
 
 instance Monoid Trivial where
   mempty = Trivial
-  mappend = (<>)
 
 instance Arbitrary Trivial where
   arbitrary = return Trivial
 
 type TrivAssoc =
   Trivial -> Trivial -> Trivial -> Bool
+
+-- 2.
+newtype Identity a
+  = Identity a
+  deriving (Eq, Show)
+
+instance Semigroup a => Semigroup (Identity a) where
+  (Identity a) <> (Identity a') = Identity (a <> a')
+
+instance Monoid a => Monoid (Identity a) where
+  mempty = Identity mempty
+
+instance Arbitrary a => Arbitrary (Identity a) where
+  arbitrary = arbitrary >>= return . Identity
+
+type IdentAssoc a =
+  Identity a -> Identity a -> Identity a -> Bool
