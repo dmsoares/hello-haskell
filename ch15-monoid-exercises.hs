@@ -22,7 +22,10 @@ main = do
   quickCheck (monoidRightIdentity :: BoolDisj -> Bool)
   quickCheck (monoidCombAssoc :: CombAssoc String String)
   quickCheck (monoidCombLeftIdentity :: Combine String String -> String -> Bool)
-  quickCheck (monoidCombRightIdentity :: String -> Combine String String -> Bool)
+  quickCheck (monoidCombRightIdentity :: Combine String String -> String -> Bool)
+  quickCheck (monoidCompAssoc :: CompAssoc String)
+  quickCheck (monoidCompLeftIdentity :: Comp String -> String -> Bool)
+  quickCheck (monoidCompRightIdentity :: Comp String -> String -> Bool)
 
 monoidAssoc ::
   (Eq m, Monoid m) =>
@@ -177,8 +180,52 @@ monoidCombLeftIdentity (Combine f) a =
 
 monoidCombRightIdentity ::
   (Eq b, Monoid b) =>
-  a ->
   Combine a b ->
+  a ->
   Bool
-monoidCombRightIdentity a (Combine f) =
+monoidCombRightIdentity (Combine f) a =
   unCombine ((Combine f) `mappend` mempty) a == unCombine (Combine f) a
+
+-- 7.
+newtype Comp a = Comp {unCompose :: a -> a}
+
+instance Show (Comp a) where
+  show _ = "Comp"
+
+instance Semigroup (Comp a) where
+  (Comp f) <> (Comp g) = Comp (f . g)
+
+instance Monoid (Comp a) where
+  mempty = Comp id
+  mappend = (<>)
+
+instance
+  (CoArbitrary a, Arbitrary a) =>
+  Arbitrary (Comp a)
+  where
+  arbitrary = do
+    f <- arbitrary
+    return $ Comp f
+
+monoidCompAssoc ::
+  Eq a =>
+  Comp a ->
+  Comp a ->
+  Comp a ->
+  a ->
+  Bool
+monoidCompAssoc f g h a =
+  unCompose (f <> g <> h) a == unCompose (f <> (g <> h)) a
+
+type CompAssoc a =
+  Comp a -> Comp a -> Comp a -> a -> Bool
+
+monoidCompLeftIdentity ::
+  Eq a => Comp a -> a -> Bool
+monoidCompLeftIdentity c a =
+  unCompose (mempty <> c) a == unCompose c a
+
+monoidCompRightIdentity ::
+  Eq a => Comp a -> a -> Bool
+monoidCompRightIdentity c a =
+  unCompose (c <> mempty) a == unCompose c a
