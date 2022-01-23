@@ -17,6 +17,9 @@ main = do
   quickCheck (monoidAssoc :: BoolConjAssoc)
   quickCheck (monoidLeftIdentity :: BoolConj -> Bool)
   quickCheck (monoidRightIdentity :: BoolConj -> Bool)
+  quickCheck (monoidAssoc :: BoolDisjAssoc)
+  quickCheck (monoidLeftIdentity :: BoolDisj -> Bool)
+  quickCheck (monoidRightIdentity :: BoolDisj -> Bool)
 
 monoidAssoc ::
   (Eq m, Monoid m) =>
@@ -109,3 +112,23 @@ instance Arbitrary BoolConj where
 
 type BoolConjAssoc =
   BoolConj -> BoolConj -> BoolConj -> Bool
+
+-- 5.
+newtype BoolDisj
+  = BoolDisj Bool
+  deriving (Eq, Show)
+
+instance Semigroup BoolDisj where
+  (BoolDisj True) <> _  = BoolDisj True
+  (BoolDisj False) <> b = b
+
+instance Monoid BoolDisj where
+  mempty = BoolDisj False
+
+instance Arbitrary BoolDisj where
+  arbitrary = do
+    b <- arbitrary
+    return $ BoolDisj b
+
+type BoolDisjAssoc =
+  BoolDisj -> BoolDisj -> BoolDisj -> Bool
