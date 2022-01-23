@@ -1,8 +1,6 @@
--- |
-
 module Ch13Exercises where
 
-import Data.Either
+import           Data.Either
 type Name = String
 type Age = Integer
 
