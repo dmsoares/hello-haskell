@@ -14,6 +14,9 @@ main = do
   quickCheck (monoidAssoc :: TwoAssoc String String)
   quickCheck (monoidLeftIdentity :: Two String String -> Bool)
   quickCheck (monoidRightIdentity :: Two String String -> Bool)
+  quickCheck (monoidAssoc :: BoolConjAssoc)
+  quickCheck (monoidLeftIdentity :: BoolConj -> Bool)
+  quickCheck (monoidRightIdentity :: BoolConj -> Bool)
 
 monoidAssoc ::
   (Eq m, Monoid m) =>
@@ -89,3 +92,20 @@ type TwoAssoc a b =
 -- 4.
 newtype BoolConj
   = BoolConj Bool
+  deriving (Eq, Show)
+
+instance Semigroup BoolConj where
+  (BoolConj True) <> b  = b
+  (BoolConj False) <> _ = BoolConj False
+
+instance Monoid BoolConj where
+  mempty = BoolConj True
+  mappend = (<>)
+
+instance Arbitrary BoolConj where
+  arbitrary = do
+    b <- arbitrary
+    return $ BoolConj b
+
+type BoolConjAssoc =
+  BoolConj -> BoolConj -> BoolConj -> Bool
