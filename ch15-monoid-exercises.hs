@@ -26,6 +26,9 @@ main = do
   quickCheck (monoidCompAssoc :: CompAssoc String)
   quickCheck (monoidCompLeftIdentity :: Comp String -> String -> Bool)
   quickCheck (monoidCompRightIdentity :: Comp String -> String -> Bool)
+  quickCheck (monoidMemAssoc :: MemAssoc Int String)
+  quickCheck (monoidMemLeftIdentity :: Mem Int String -> Int -> Bool)
+  quickCheck (monoidMemRightIdentity :: Mem Int String -> Int -> Bool)
 
 monoidAssoc ::
   (Eq m, Monoid m) =>
@@ -184,7 +187,10 @@ monoidCombRightIdentity ::
   a ->
   Bool
 monoidCombRightIdentity (Combine f) a =
-  unCombine ((Combine f) `mappend` mempty) a == unCombine (Combine f) a
+  unCombine
+    ((Combine f) `mappend` mempty)
+    a
+    == unCombine (Combine f) a
 
 -- 7.
 newtype Comp a = Comp {unCompose :: a -> a}
@@ -229,3 +235,61 @@ monoidCompRightIdentity ::
   Eq a => Comp a -> a -> Bool
 monoidCompRightIdentity c a =
   unCompose (c <> mempty) a == unCompose c a
+
+-- 8.
+newtype Mem s a = Mem {runMem :: s -> (a, s)}
+
+instance Show (Mem s a) where
+  show _ = "Mem"
+
+instance (Semigroup a) => Semigroup (Mem s a) where
+  (Mem f) <> (Mem g) =
+    Mem $
+      (\(a, (a', s)) -> (a <> a', s))
+        . (\(a, s) -> (a, g s))
+        . f
+
+instance (Monoid a) => Monoid (Mem s a) where
+  mempty = Mem (\s -> (mempty, s))
+  mappend = (<>)
+
+instance
+  (CoArbitrary s, Arbitrary s, Arbitrary a) =>
+  Arbitrary (Mem s a)
+  where
+  arbitrary = do
+    f <- arbitrary
+    return $ Mem f
+
+monoidMemAssoc ::
+  (Eq a, Eq s, Semigroup a) =>
+  Mem s a ->
+  Mem s a ->
+  Mem s a ->
+  s ->
+  Bool
+monoidMemAssoc f g h s =
+  runMem (f <> g <> h) s == runMem (f <> (g <> h)) s
+
+type MemAssoc s a =
+  Mem s a ->
+  Mem s a ->
+  Mem s a ->
+  s ->
+  Bool
+
+monoidMemLeftIdentity ::
+  (Eq s, Eq a, Monoid a) =>
+  Mem s a ->
+  s ->
+  Bool
+monoidMemLeftIdentity m s =
+  runMem (m <> mempty) s == runMem m s
+
+monoidMemRightIdentity ::
+  (Eq s, Eq a, Monoid a, Num s) =>
+  Mem s a ->
+  s ->
+  Bool
+monoidMemRightIdentity m s =
+  runMem (mempty <> m) s == runMem m s
