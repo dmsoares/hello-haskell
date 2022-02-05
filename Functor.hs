@@ -1,5 +1,3 @@
-{-# LANGUAGE ViewPatterns #-}
-
 module Functor where
 
 import           Test.QuickCheck

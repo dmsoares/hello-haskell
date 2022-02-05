@@ -175,3 +175,24 @@ type Four'FunctorCompose =
 
 -- 8.
 -- Can't implement instance of Functor for Trivial. It has kind *.
+
+-- Possibly
+data Possibly a
+  = LolNope
+  | Yeppers a
+  deriving (Eq, Show)
+
+instance Functor Possibly where
+  fmap f (Yeppers a) = Yeppers $ f a
+  fmap f LolNope     = LolNope
+
+-- Short Exercise on Either
+-- 1.
+data Sum a b
+  = First a
+  | Second b
+  deriving (Eq, Show)
+
+instance Functor (Sum a) where
+  fmap f (Second b) = Second (f b)
+  fmap f (First a)  = First a
