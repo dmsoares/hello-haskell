@@ -29,6 +29,7 @@ main = do
   quickCheck (functorCompose' :: IdentityFunctorCompose)
   quickCheck (functorCompose' :: PairFunctorCompose)
   quickCheck (functorCompose' :: TwoFunctorCompose)
+  quickCheck (functorCompose' :: ThreeFunctorCompose)
 
 functorCompose' ::
   (Eq (f c), Functor f) =>
@@ -87,6 +88,25 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
 
 type TwoFunctorCompose =
   Two Int Int ->
+  Fun Int Int ->
+  Fun Int Int ->
+  Bool
+
+-- 4.
+data Three a b c = Three a b c
+  deriving (Eq, Show)
+
+instance Functor (Three a b) where
+  fmap f (Three a b c) = Three a b (f c)
+
+instance (Arbitrary a, Arbitrary b, Arbitrary c) => Arbitrary (Three a b c) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    Three a b <$> arbitrary
+
+type ThreeFunctorCompose =
+  Three Int Int Int ->
   Fun Int Int ->
   Fun Int Int ->
   Bool
