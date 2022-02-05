@@ -172,3 +172,6 @@ type Four'FunctorCompose =
   Fun Int Int ->
   Fun Int Int ->
   Bool
+
+-- 8.
+-- Can't implement instance of Functor for Trivial. It has kind *.
