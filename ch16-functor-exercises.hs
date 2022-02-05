@@ -27,6 +27,8 @@ e =
 main :: IO ()
 main = do
   quickCheck (functorCompose' :: IdentityFunctorCompose)
+  quickCheck (functorCompose' :: PairFunctorCompose)
+  quickCheck (functorCompose' :: TwoFunctorCompose)
 
 functorCompose' ::
   (Eq (f c), Functor f) =>
@@ -55,3 +57,36 @@ type IdentityFunctorCompose =
 
 -- 2.
 data Pair a = Pair a a
+  deriving (Eq, Show)
+
+instance Functor Pair where
+  fmap f (Pair a a') = Pair (f a) (f a')
+
+instance (Arbitrary a) => Arbitrary (Pair a) where
+  arbitrary = do
+    a <- arbitrary
+    Pair a <$> arbitrary
+
+type PairFunctorCompose =
+  Pair Int ->
+  Fun Int Int ->
+  Fun Int Int ->
+  Bool
+
+-- 3.
+data Two a b = Two a b
+  deriving (Eq, Show)
+
+instance Functor (Two a) where
+  fmap f (Two a b) = Two a (f b)
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
+  arbitrary = do
+    a <- arbitrary
+    Two a <$> arbitrary
+
+type TwoFunctorCompose =
+  Two Int Int ->
+  Fun Int Int ->
+  Fun Int Int ->
+  Bool
