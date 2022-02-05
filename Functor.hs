@@ -1,4 +1,9 @@
+{-# LANGUAGE ViewPatterns #-}
+
 module Functor where
+
+import           Test.QuickCheck
+import           Test.QuickCheck.Function
 
 -- P-Funkshun
 
@@ -52,3 +57,34 @@ thriceLifted = (fmap . fmap . fmap) replaceWithP
 
 thriceLifted' :: [Maybe [Char]] -> [Maybe [Char]]
 thriceLifted' = thriceLifted
+
+-- Functor laws
+-- fmap id = id
+-- fmap (f . g) = (fmap f) . (fmap g)
+
+-- QuickCheck properties
+functorIdentity ::
+  (Functor f, Eq (f a)) =>
+  f a ->
+  Bool
+functorIdentity f =
+  fmap id f == f
+
+functorCompose ::
+  (Functor f, Eq (f c)) =>
+  (a -> b) ->
+  (b -> c) ->
+  f a ->
+  Bool
+functorCompose f g x =
+  (fmap (g . f) x) == ((fmap g) . (fmap f)) x
+
+-- Making QuickCheck generate functions
+functorCompose' ::
+  (Eq (f c), Functor f) =>
+  f a ->
+  Fun a b ->
+  Fun b c ->
+  Bool
+functorCompose' x (Fun _ f) (Fun _ g) =
+  (fmap (g . f) x) == (fmap g . fmap f $ x)
