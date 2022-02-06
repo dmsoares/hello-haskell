@@ -1,16 +1,19 @@
 module Ch16FunctorExercises where
 
+import           GHC.Arr
 import           Test.QuickCheck
 import           Test.QuickCheck.Function
 
 -- Heavy Lifting
 -- 1.
+a :: [Int]
 a = (+ 1) <$> read "[1]" :: [Int]
 
 -- 2.
 b = (fmap . fmap) (++ "lol") (Just ["Hi,", "Hello"])
 
 -- 3.
+c :: Integer -> Integer
 c = fmap (* 2) (\x -> x - 2)
 
 -- 4.
@@ -33,6 +36,9 @@ main = do
   quickCheck (functorCompose' :: Three'FunctorCompose)
   quickCheck (functorCompose' :: FourFunctorCompose)
   quickCheck (functorCompose' :: Four'FunctorCompose)
+  putStrLn "Chapter exercises:"
+  quickCheck (functorCompose' :: BASEFunctorCompose)
+  quickCheck (functorCompose' :: BAMSEFunctorCompose)
 
 functorCompose' ::
   (Eq (f c), Functor f) =>
@@ -196,3 +202,50 @@ data Sum a b
 instance Functor (Sum a) where
   fmap f (Second b) = Second (f b)
   fmap f (First a)  = First a
+
+-- Chapter exercises
+-- 1. no can do
+-- 2.
+data BoolAndSomethingElse a
+  = False' a
+  | True' a
+  deriving (Eq, Show)
+
+instance Functor BoolAndSomethingElse where
+  fmap f (False' a) = False' (f a)
+  fmap f (True' a)  = True' (f a)
+
+instance Arbitrary a => Arbitrary (BoolAndSomethingElse a) where
+  arbitrary = oneof [False' <$> arbitrary, True' <$> arbitrary]
+
+type BASEFunctorCompose =
+  BoolAndSomethingElse Int ->
+  Fun Int Int ->
+  Fun Int Int ->
+  Bool
+
+-- 3.
+data BoolAndMaybeSomethingElse a
+  = Falsish
+  | Truish a
+  deriving (Eq, Show)
+
+instance Functor BoolAndMaybeSomethingElse where
+  fmap _ Falsish    = Falsish
+  fmap f (Truish a) = Truish (f a)
+
+instance Arbitrary a => Arbitrary (BoolAndMaybeSomethingElse a) where
+  arbitrary = oneof [return Falsish, Truish <$> arbitrary]
+
+type BAMSEFunctorCompose =
+  BoolAndMaybeSomethingElse Int ->
+  Fun Int Int ->
+  Fun Int Int ->
+  Bool
+
+-- 4.
+newtype Mu f = InF {outF :: f (Mu f)} -- not possible, has kind: (* -> *) -> *
+
+-- 5.
+data D
+  = D (Array Word Word) Int Int -- not possible, has kind: *
