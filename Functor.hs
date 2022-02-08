@@ -86,3 +86,11 @@ functorCompose' ::
   Bool
 functorCompose' x (Fun _ f) (Fun _ g) =
   (fmap (g . f) x) == (fmap g . fmap f $ x)
+
+-- More structure, more functors
+data Wrap f a
+  = Wrap (f a)
+  deriving (Eq, Show)
+
+instance Functor f => Functor (Wrap f) where
+  fmap f (Wrap fa) = Wrap (fmap f fa)
