@@ -513,6 +513,6 @@ instance Eq a => Eq (TalkToMe a) where
   (==) _ _                       = False
 
 instance Functor TalkToMe where
-  fmap f Halt        = Halt
+  fmap _ Halt        = Halt
   fmap f (Print s a) = Print s (f a)
   fmap f (Read g)    = Read (f . g)
