@@ -1,6 +1,7 @@
 module Ch17ApplicativeExercises where
 
-import           Data.List (elemIndex)
+import           Control.Applicative (liftA3)
+import           Data.List           (elemIndex)
 
 -- Lookups
 -- 1.
@@ -44,3 +45,36 @@ y' = lookup 2 $ zip xs ys
 
 summed :: Maybe Integer
 summed = sum <$> ((,) <$> x <*> y)
+
+-- Identity Instance
+newtype Identity a = Identity a
+  deriving (Eq, Ord, Show)
+
+instance Functor Identity where
+  fmap f (Identity a) = Identity (f a)
+
+instance Applicative Identity where
+  pure = Identity
+  (<*>) (Identity f) (Identity a) = Identity (f a)
+
+-- Constant Instance
+newtype Constant a b = Constant {getConstant :: a}
+  deriving (Eq, Ord, Show)
+
+instance Functor (Constant a) where
+  fmap f (Constant a) = Constant a
+
+instance Monoid a => Applicative (Constant a) where
+  pure a = Constant mempty
+  (<*>) (Constant a) (Constant a') = Constant (a <> a')
+
+-- Fixer Upper
+-- 1.
+x1 = const <$> Just "Hello" <*> pure "World"
+
+-- 2.
+x2 =
+  (,,,) <$> Just 90
+    <*> Just 10
+    <*> Just "Tierness"
+    <*> pure [1, 2, 3]
