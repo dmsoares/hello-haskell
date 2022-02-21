@@ -78,3 +78,41 @@ x2 =
     <*> Just 10
     <*> Just "Tierness"
     <*> pure [1, 2, 3]
+
+--
+v =
+  (.)
+    <$> [(+ 1)]
+    <*> [(* 2)]
+    <*> [1, 2, 3]
+
+v' = [(+ 1)] <*> ([(* 2)] <*> [1, 2, 3])
+
+-- List Applicative Exercise
+data List a
+  = Nil
+  | Cons a (List a)
+  deriving (Eq, Show)
+
+instance Semigroup (List a) where
+  (<>) Nil list = list
+  (<>) list Nil = list
+  (<>) (Cons x xs) list =
+    case xs of
+      Nil -> Cons x list
+      _   -> Cons x ((<>) xs list)
+
+instance Functor List where
+  fmap _ Nil         = Nil
+  fmap f (Cons a as) = Cons (f a) (fmap f as)
+
+instance Applicative List where
+  pure x = Cons x Nil
+  (<*>) Nil _ = Nil
+  (<*>) _ Nil = Nil
+  (<*>) fs@(Cons f fRest) xs@(Cons x xRest) =
+    go xs . fmap fmap $ fs
+    where
+      go Nil _          = Nil
+      go _ Nil          = Nil
+      go xs (Cons f fs) = f xs <> go xs fs
