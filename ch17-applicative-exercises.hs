@@ -1,7 +1,11 @@
 module Ch17ApplicativeExercises where
 
-import           Control.Applicative (liftA3)
-import           Data.List           (elemIndex)
+import           Control.Applicative
+import           Data.List                (elemIndex)
+import           Data.Monoid
+import           Test.QuickCheck
+import           Test.QuickCheck.Checkers
+import           Test.QuickCheck.Classes
 
 -- Lookups
 -- 1.
@@ -94,14 +98,6 @@ data List a
   | Cons a (List a)
   deriving (Eq, Show)
 
-instance Semigroup (List a) where
-  (<>) Nil list = list
-  (<>) list Nil = list
-  (<>) (Cons x xs) list =
-    case xs of
-      Nil -> Cons x list
-      _   -> Cons x ((<>) xs list)
-
 instance Functor List where
   fmap _ Nil         = Nil
   fmap f (Cons a as) = Cons (f a) (fmap f as)
@@ -110,9 +106,32 @@ instance Applicative List where
   pure x = Cons x Nil
   (<*>) Nil _ = Nil
   (<*>) _ Nil = Nil
-  (<*>) fs@(Cons f fRest) xs@(Cons x xRest) =
-    go xs . fmap fmap $ fs
+  (<*>) (Cons f fs) xs = append (f <$> xs) (fs <*> xs)
     where
-      go Nil _          = Nil
-      go _ Nil          = Nil
-      go xs (Cons f fs) = f xs <> go xs fs
+      append Nil list         = list
+      append (Cons x xs) list = Cons x (append xs list)
+
+instance Arbitrary a => Arbitrary (List a) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    return $ Cons a (Cons b Nil)
+
+instance Eq a => EqProp (List a) where
+  (=-=) = eq
+
+-- flatMap
+append :: List a -> List a -> List a
+append Nil list         = list
+append (Cons x xs) list = Cons x (append xs list)
+
+fold :: (a -> b -> b) -> b -> List a -> b
+fold _ b Nil        = b
+fold f b (Cons h t) = f h (fold f b t)
+
+concat' :: List (List a) -> List a
+concat' = fold append Nil
+
+flatMap :: (a -> List b) -> List a -> List b
+flatMap f Nil         = Nil
+flatMap f (Cons a as) = append (f a) (flatMap f as)
