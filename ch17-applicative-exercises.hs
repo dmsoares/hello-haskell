@@ -272,3 +272,64 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
 
 instance (Eq a, Eq b) => EqProp (Two a b) where
   (=-=) = eq
+
+-- 3.
+data Three a b c = Three a b c deriving (Eq, Show)
+
+instance Functor (Three a b) where
+  fmap f (Three a b c) = Three a b (f c)
+
+instance (Monoid a, Monoid b) => Applicative (Three a b) where
+  pure = Three mempty mempty
+  (<*>) (Three a b f) (Three a' b' c) = Three (a <> a') (b <> b') (f c)
+
+-- 4.
+data Three' a b = Three' a b b deriving (Eq, Show)
+
+instance Functor (Three' a) where
+  fmap f (Three' a b b') = Three' a (f b) (f b')
+
+instance Monoid a => Applicative (Three' a) where
+  pure x = Three' mempty x x
+  (<*>) (Three' a f f') (Three' a' b b') = Three' (a <> a') (f b) (f' b')
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Three' a b) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    Three' a b <$> arbitrary
+
+instance (Eq a, Eq b) => EqProp (Three' a b) where
+  (=-=) = eq
+
+-- 5.
+data Four a b c d = Four a b c d deriving (Eq, Show)
+
+instance Functor (Four a b c) where
+  fmap f (Four a b c d) = Four a b c (f d)
+
+instance (Monoid a, Monoid b, Monoid c) => Applicative (Four a b c) where
+  pure = Four mempty mempty mempty
+  (<*>) (Four a b c f) (Four a' b' c' d) =
+    Four (a <> a') (b <> b') (c <> c') (f d)
+
+-- 6.
+data Four' a b = Four' a a a b deriving (Eq, Show)
+
+instance Functor (Four' a) where
+  fmap f (Four' a0 a1 a2 b) = Four' a0 a1 a2 (f b)
+
+instance Monoid a => Applicative (Four' a) where
+  pure = Four' mempty mempty mempty
+  (<*>) (Four' a0 a1 a2 f) (Four' a0' a1' a2' b) =
+    Four' (a0 <> a0') (a1 <> a1') (a2 <> a2') (f b)
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Four' a b) where
+  arbitrary = do
+    a0 <- arbitrary
+    a1 <- arbitrary
+    a2 <- arbitrary
+    Four' a0 a1 a2 <$> arbitrary
+
+instance (Eq a, Eq b) => EqProp (Four' a b) where
+  (=-=) = eq
