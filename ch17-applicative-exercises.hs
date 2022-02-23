@@ -3,7 +3,7 @@ module Ch17ApplicativeExercises where
 import           Control.Applicative
 import           Data.List                (elemIndex)
 import           Data.Monoid
-import           Test.QuickCheck
+import           Test.QuickCheck          hiding (Failure, Success)
 import           Test.QuickCheck.Checkers
 import           Test.QuickCheck.Classes
 
@@ -167,6 +167,7 @@ instance Applicative ZipList' where
   pure x = ZipList' $ go x
     where
       go x = Cons x (go x)
+
   (<*>) (ZipList' Nil) _ = ZipList' Nil
   (<*>) _ (ZipList' Nil) = ZipList' Nil
   (<*>) (ZipList' fList) (ZipList' xList) =
@@ -179,3 +180,27 @@ instance Applicative ZipList' where
 
 instance Arbitrary a => Arbitrary (ZipList' a) where
   arbitrary = ZipList' <$> arbitrary
+
+-- Variations on Either
+data Validation e a
+  = Failure e
+  | Success a
+  deriving (Eq, Show)
+
+instance Functor (Validation e) where
+  fmap _ (Failure e) = Failure e
+  fmap f (Success a) = Success (f a)
+
+instance Monoid e => Applicative (Validation e) where
+  pure = Success
+  (<*>) (Success f) (Success a)  = Success (f a)
+  (<*>) (Failure e) (Failure e') = Failure (e <> e')
+  (<*>) (Failure e) _            = Failure e
+  (<*>) _ (Failure e)            = Failure e
+
+instance (Arbitrary e, Arbitrary a) => Arbitrary (Validation e a) where
+  arbitrary =
+    oneof [Failure <$> arbitrary, Success <$> arbitrary]
+
+instance (Eq e, Eq a) => EqProp (Validation e a) where
+  (=-=) = eq
