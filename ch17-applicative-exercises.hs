@@ -1,3 +1,5 @@
+{-# LANGUAGE Rank2Types #-}
+
 module Ch17ApplicativeExercises where
 
 import           Control.Applicative
@@ -204,3 +206,32 @@ instance (Arbitrary e, Arbitrary a) => Arbitrary (Validation e a) where
 
 instance (Eq e, Eq a) => EqProp (Validation e a) where
   (=-=) = eq
+
+-- Chapter Exercises
+-- 1. []
+listPure :: a -> [a]
+listPure = pure
+
+listAp :: [a -> b] -> [a] -> [b]
+listAp = (<*>)
+
+-- 2. IO
+ioPure :: a -> IO a
+ioPure = pure
+
+ioAp :: IO (a -> b) -> IO a -> IO b
+ioAp = (<*>)
+
+-- 3. (,) a
+tuplePure :: Monoid a => b -> (a, b)
+tuplePure = pure
+
+tupleAp :: Monoid a => (a, b -> c) -> (a, b) -> (a, c)
+tupleAp = (<*>)
+
+-- 4. (->) e
+fnPure :: a -> (->) e a
+fnPure = pure
+
+fnAp :: (e -> (a -> b)) -> (e -> a) -> (e -> b)
+fnAp = (<*>)
