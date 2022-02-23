@@ -208,6 +208,7 @@ instance (Eq e, Eq a) => EqProp (Validation e a) where
   (=-=) = eq
 
 -- Chapter Exercises
+-- Specialization
 -- 1. []
 listPure :: a -> [a]
 listPure = pure
@@ -235,3 +236,21 @@ fnPure = pure
 
 fnAp :: (e -> (a -> b)) -> (e -> a) -> (e -> b)
 fnAp = (<*>)
+
+-- 1.
+data Pair a = Pair a a deriving (Eq, Show)
+
+instance Functor Pair where
+  fmap f (Pair a a') = Pair (f a) (f a')
+
+instance Applicative Pair where
+  pure a = Pair a a
+  (<*>) (Pair f f') (Pair a a') = Pair (f a) (f' a')
+
+instance Arbitrary a => Arbitrary (Pair a) where
+  arbitrary = do
+    a <- arbitrary
+    Pair a <$> arbitrary
+
+instance Eq a => EqProp (Pair a) where
+  (=-=) = eq
