@@ -2,7 +2,7 @@
 
 module Ch17ApplicativeExercises where
 
-import           Control.Applicative
+import           Control.Applicative      (liftA3)
 import           Data.List                (elemIndex)
 import           Data.Monoid
 import           Test.QuickCheck          hiding (Failure, Success)
@@ -333,3 +333,13 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (Four' a b) where
 
 instance (Eq a, Eq b) => EqProp (Four' a b) where
   (=-=) = eq
+
+-- Combinations
+stops :: String
+stops = "pbtdkg"
+
+vowels :: String
+vowels = "aeiou"
+
+combos :: [a] -> [b] -> [c] -> [(a, b, c)]
+combos = liftA3 (,,)
