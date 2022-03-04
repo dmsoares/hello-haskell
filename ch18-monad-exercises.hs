@@ -72,6 +72,11 @@ instance Applicative (PhhhbbtttEither b) where
   (Right' b) <*> _         = Right' b
   _ <*> (Right' b)         = Right' b
 
+instance Monad (PhhhbbtttEither b) where
+  return = pure
+  (Left' a) >>= k  = k a
+  (Right' b) >>= k = Right' b
+
 instance
   (Arbitrary a, Arbitrary b) =>
   Arbitrary (PhhhbbtttEither b a)
