@@ -75,7 +75,7 @@ instance Applicative (PhhhbbtttEither b) where
 instance Monad (PhhhbbtttEither b) where
   return = pure
   (Left' a) >>= k  = k a
-  (Right' b) >>= k = Right' b
+  (Right' b) >>= _ = Right' b
 
 instance
   (Arbitrary a, Arbitrary b) =>
@@ -85,4 +85,25 @@ instance
     oneof [Left' <$> arbitrary, Right' <$> arbitrary]
 
 instance (Eq a, Eq b) => EqProp (PhhhbbtttEither b a) where
+  (=-=) = eq
+
+-- 3.
+newtype Identity a = Identity a
+  deriving (Eq, Ord, Show)
+
+instance Functor Identity where
+  fmap f (Identity a) = Identity $ f a
+
+instance Applicative Identity where
+  pure = Identity
+  (Identity a) <*> (Identity a') = Identity $ a a'
+
+instance Monad Identity where
+  return = pure
+  (Identity a) >>= k = k a
+
+instance Arbitrary a => Arbitrary (Identity a) where
+  arbitrary = Identity <$> arbitrary
+
+instance Eq a => EqProp (Identity a) where
   (=-=) = eq
