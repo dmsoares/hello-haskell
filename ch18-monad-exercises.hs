@@ -55,3 +55,29 @@ instance Arbitrary (Nope a) where
 
 instance Eq a => EqProp (Nope a) where
   (=-=) = eq
+
+-- 2.
+data PhhhbbtttEither b a
+  = Left' a
+  | Right' b
+  deriving (Eq, Show)
+
+instance Functor (PhhhbbtttEither b) where
+  fmap f (Left' a)  = Left' $ f a
+  fmap _ (Right' b) = Right' b
+
+instance Applicative (PhhhbbtttEither b) where
+  pure = Left'
+  (Left' a) <*> (Left' a') = Left' $ a a'
+  (Right' b) <*> _         = Right' b
+  _ <*> (Right' b)         = Right' b
+
+instance
+  (Arbitrary a, Arbitrary b) =>
+  Arbitrary (PhhhbbtttEither b a)
+  where
+  arbitrary =
+    oneof [Left' <$> arbitrary, Right' <$> arbitrary]
+
+instance (Eq a, Eq b) => EqProp (PhhhbbtttEither b a) where
+  (=-=) = eq
