@@ -1,7 +1,10 @@
 module Ch18Monad where
 
-import           Control.Applicative ((*>))
-import           Control.Monad       (join)
+import           Control.Applicative      ((*>))
+import           Control.Monad            (join, (>=>))
+import           Test.QuickCheck
+import           Test.QuickCheck.Checkers
+import           Test.QuickCheck.Classes
 
 sequencing :: IO ()
 sequencing = do
@@ -149,3 +152,53 @@ mkSoftware years coders = do
       Left $
         TooManyCodersForYears years coders
     else Right $ Shop founded programmers
+
+-- Bad Monads and their denizens
+data CountMe a
+  = CountMe Integer a
+  deriving (Eq, Show)
+
+instance Functor CountMe where
+  fmap f (CountMe i a) =
+    CountMe i (f a)
+
+instance Applicative CountMe where
+  pure = CountMe 0
+  CountMe n f <*> CountMe n' a =
+    CountMe (n + n') (f a)
+
+instance Monad CountMe where
+  return = pure
+
+  CountMe n a >>= f =
+    let CountMe n' b = f a
+     in CountMe (n + n') b
+
+instance Arbitrary a => Arbitrary (CountMe a) where
+  arbitrary =
+    CountMe <$> arbitrary <*> arbitrary
+
+instance Eq a => EqProp (CountMe a) where
+  (=-=) = eq
+
+mcomp ::
+  Monad m =>
+  (a -> m b) ->
+  (b -> m c) ->
+  a ->
+  m c
+mcomp g f a = f =<< g a
+
+sayHi :: String -> IO String
+sayHi greeting = do
+  putStrLn greeting
+  getLine
+
+readM :: Read a => String -> IO a
+readM = return . read
+
+getAge :: String -> IO Int
+getAge = sayHi >=> readM
+
+askForAge :: IO Int
+askForAge = getAge "Hi!"
