@@ -107,3 +107,55 @@ instance Arbitrary a => Arbitrary (Identity a) where
 
 instance Eq a => EqProp (Identity a) where
   (=-=) = eq
+
+-- 4.
+data List a
+  = Nil
+  | Cons a (List a)
+  deriving (Eq, Show)
+
+instance Semigroup (List a) where
+  (<>) Nil list = list
+  (<>) list Nil = list
+  (<>) (Cons a as) list' =
+    case as of
+      Nil -> Cons a list'
+      _   -> Cons a ((<>) as list')
+
+instance Monoid (List a) where
+  mempty = Nil
+  mappend = (<>)
+
+instance Functor List where
+  fmap _ Nil = Nil
+  fmap f (Cons a as) =
+    Cons (f a) (fmap f as)
+
+instance Applicative List where
+  pure a = Cons a Nil
+  Nil <*> _ = Nil
+  _ <*> Nil = Nil
+  (Cons a as) <*> list =
+    (a <$> list) <> (as <*> list)
+
+instance Monad List where
+  return = pure
+  Nil >>= _ = Nil
+  list >>= k =
+    listJoin $ k <$> list
+    where
+      listJoin Nil = Nil
+      listJoin (Cons a as) =
+        a <> listJoin as
+
+instance Arbitrary a => Arbitrary (List a) where -- from stackoverflow
+  arbitrary = sized go
+    where
+      go 0 = pure Nil
+      go n = do
+        xs <- go (n - 1)
+        x <- arbitrary
+        return (Cons x xs)
+
+instance Eq a => EqProp (List a) where
+  (=-=) = eq
