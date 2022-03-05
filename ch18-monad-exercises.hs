@@ -159,3 +159,8 @@ instance Arbitrary a => Arbitrary (List a) where -- from stackoverflow
 
 instance Eq a => EqProp (List a) where
   (=-=) = eq
+
+-- Write functions with methods from Functor and Monad
+-- 1.
+j :: Monad m => m (m a) -> m a
+j m = m >>= id
