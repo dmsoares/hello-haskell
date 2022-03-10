@@ -180,6 +180,6 @@ l2 f ma mb = mb >>= (\b -> ma >>= (\a -> return $ f a b))
 
 -- 4.
 a :: Monad m => m a -> m (a -> b) -> m b
-a = undefined
+a ma mf = ma >>= \a -> mf >>= \f -> return $ f a
 
 -- 5.
