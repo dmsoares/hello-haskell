@@ -164,3 +164,22 @@ instance Eq a => EqProp (List a) where
 -- 1.
 j :: Monad m => m (m a) -> m a
 j m = m >>= id
+
+-- 2.
+l1 :: Monad m => (a -> b) -> m a -> m b
+l1 f m = m >>= (return . f)
+
+-- 3.
+l2 ::
+  Monad m =>
+  (a -> b -> c) ->
+  m a ->
+  m b ->
+  m c
+l2 f ma mb = mb >>= (\b -> ma >>= (\a -> return $ f a b))
+
+-- 4.
+a :: Monad m => m a -> m (a -> b) -> m b
+a = undefined
+
+-- 5.
