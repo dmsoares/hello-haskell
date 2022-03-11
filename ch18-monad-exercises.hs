@@ -183,3 +183,10 @@ a :: Monad m => m a -> m (a -> b) -> m b
 a ma mf = ma >>= \a -> mf >>= \f -> return $ f a
 
 -- 5.
+meh ::
+  Monad m =>
+  [a] ->
+  (a -> m b) ->
+  m [b]
+meh [] _       = return []
+meh (x : xs) f = f x >>= (\l -> (l ++) <$> meh xs f) . (: [])
