@@ -190,3 +190,7 @@ meh ::
   m [b]
 meh [] _       = return []
 meh (x : xs) f = f x >>= (\l -> (l ++) <$> meh xs f) . (: [])
+
+-- 6.
+flipType :: (Monad m) => [m a] -> m [a]
+flipType = flip meh id
