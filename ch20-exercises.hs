@@ -1,7 +1,10 @@
 module Ch20Exercises where
 
-import Data.Foldable
 import Data.Monoid
+  ( Any (Any, getAny),
+    Product (Product, getProduct),
+    Sum (Sum, getSum),
+  )
 
 -- Library Functions
 -- 1.
