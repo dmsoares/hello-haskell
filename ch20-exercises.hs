@@ -52,3 +52,45 @@ fold = Prelude.foldMap id
 -- 10.
 foldMap :: (Foldable t, Monoid m) => (a -> m) -> t a -> m
 foldMap f = foldr ((<>) . f) mempty
+
+-- Chapter Exercises
+-- 1.
+data Constant a b = Constant b
+  deriving (Show)
+
+instance Foldable (Constant a) where
+  foldMap f (Constant b) = f b
+
+-- 2.
+data Two a b = Two a b
+  deriving (Show)
+
+instance Foldable (Two a) where
+  foldMap f (Two _ b) = f b
+
+-- 3.
+data Three a b c = Three a b c
+  deriving (Show)
+
+instance Foldable (Three a b) where
+  foldMap f (Three _ _ c) = f c
+
+-- 4.
+data Three' a b = Three' a b b
+  deriving (Show)
+
+instance Foldable (Three' a) where
+  foldMap f (Three' _ b b') = f b <> f b'
+
+-- 5.
+data Four a b = Four a b b b
+  deriving (Show)
+
+instance Foldable (Four a) where
+  foldMap f (Four _ b b' b'') = f b <> f b' <> f b''
+
+-- Filter function using foldMap
+filterF :: (Applicative f, Foldable t, Monoid (f a)) => (a -> Bool) -> t a -> f a
+filterF p = Prelude.foldMap f
+  where
+    f a = if p a then pure a else mempty
