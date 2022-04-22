@@ -218,6 +218,38 @@ instance
   (S x y) =-= (S p q) =
     property ((=-=) <$> x <*> p) .&. (y =-= q)
 
+-- Instances for Tree
+data Tree a
+  = Empty
+  | Leaf a
+  | Node (Tree a) a (Tree a)
+  deriving (Eq, Show)
+
+instance Functor Tree where
+  fmap _ Empty = Empty
+  fmap f (Leaf a) = Leaf (f a)
+  fmap f (Node t a t') = Node (fmap f t) (f a) (fmap f t')
+
+instance Foldable Tree where
+  foldMap _ Empty = mempty
+  foldMap f (Leaf a) = f a
+  foldMap f (Node t a t') = foldMap f t <> f a <> foldMap f t'
+
+  foldr _ z Empty = z
+  foldr f z (Leaf a) = f a z
+  foldr f z (Node t a t') = foldr f (f a (foldr f z t')) t
+
+instance Traversable Tree where
+  traverse _ Empty = pure Empty
+  traverse f (Leaf a) = Leaf <$> f a
+  traverse f (Node t a t') = Node <$> traverse f t <*> f a <*> traverse f t'
+
+instance Arbitrary a => Arbitrary (Tree a) where
+  arbitrary = frequency [(1, pure Empty), (3, Leaf <$> arbitrary), (3, Node <$> arbitrary <*> arbitrary <*> arbitrary)]
+
+instance Eq a => EqProp (Tree a) where
+  (=-=) = eq
+
 main :: IO ()
 main =
   hspec $ do
@@ -292,3 +324,11 @@ main =
         property $ quickBatch $ foldable (undefined :: S Maybe (Int, Float, String, Int, String))
       it "Traversable" $
         property $ quickBatch $ traversable (undefined :: S Maybe (Maybe String, Maybe String, String, String))
+
+    describe "Tree" $ do
+      it "Functor" $
+        property $ quickBatch $ functor (undefined :: Tree (Int, Float, String))
+      it "Foldable" $
+        property $ quickBatch $ foldable (undefined :: Tree (Int, Float, String, Int, String))
+      it "Traversable" $
+        property $ quickBatch $ traversable (undefined :: Tree (Maybe Int, Maybe Float, Int, String))
