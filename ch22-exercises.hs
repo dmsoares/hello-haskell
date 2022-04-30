@@ -129,3 +129,5 @@ getDogRM' =
   Reader dogName >>= \name ->
     Reader address >>= \addy ->
       return $ Dog name addy
+
+-- For chapter exercises see the ReaderPractice module
