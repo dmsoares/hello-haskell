@@ -68,3 +68,45 @@ getDog p =
 getDogR :: Person -> Dog
 getDogR =
   Dog <$> dogName <*> address
+
+-- The Monad of functions
+foo :: (Functor f, Num a) => f a -> f a
+foo r = fmap (+ 1) r
+
+bar :: Foldable f => t -> f a -> (t, Int)
+bar r t = (r, length t)
+
+froot :: Num a => [a] -> ([a], Int)
+froot r = (map (+ 1) r, length r)
+
+barOne :: Foldable t => t a -> (t a, Int)
+barOne r = (r, length r)
+
+barPlus r = (foo r, length r)
+
+frooty :: Num a => [a] -> ([a], Int)
+frooty r = bar (foo r) r
+
+frooty' :: Num a => [a] -> ([a], Int)
+frooty' = \r -> bar (foo r) r
+
+fooBind :: (r -> a) -> (a -> r -> b) -> (r -> b)
+fooBind m k = \r -> k (m r) r
+
+-- the above type is quite similar to: (>>=) :: Monad m => m a -> (a -> m b) -> m b
+-- and so...
+frooty'' :: Num a => [a] -> ([a], Int)
+frooty'' = foo >>= bar
+
+-- Person and Dog with Reader Monad
+getDogRM :: Person -> Dog
+getDogRM = do
+  name <- dogName
+  addy <- address
+  return $ Dog name addy
+
+getDogRM' :: Person -> Dog
+getDogRM' =
+  dogName >>= \name ->
+    address >>= \addy ->
+      return $ Dog name addy
