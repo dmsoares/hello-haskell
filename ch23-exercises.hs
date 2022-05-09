@@ -90,3 +90,12 @@ instance Applicative (Moi s) where
       let (a1, s1) = f s
           (a2, s2) = g s1
        in (a1 a2, s2)
+
+instance Monad (Moi s) where
+  return = pure
+
+  (>>=) :: Moi s a -> (a -> Moi s b) -> Moi s b
+  (Moi f) >>= k =
+    Moi $ \s ->
+      let (a1, s') = f s
+       in runMoi (k a1) s'
