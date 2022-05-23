@@ -1,8 +1,10 @@
 module Ch23State where
 
 import Control.Applicative (liftA3)
-import Control.Monad (replicateM)
+import Control.Monad (mapM_, replicateM)
 import Control.Monad.Trans.State
+import qualified Data.DList as DL
+import Data.Time (diffUTCTime)
 import System.Random
 
 data Die
@@ -60,3 +62,47 @@ rollsToGetTwenty g = go 0 0 g
       | otherwise =
         let (die, nextGen) = randomR (1, 6) gen
          in go (sum + die) (count + 1) nextGen
+
+-- FizzBuzz
+-- typical solution
+fizzBuzz :: Integer -> String
+fizzBuzz n
+  | n `mod` 15 == 0 = "FizzBuzz"
+  | n `mod` 5 == 0 = "Buzz"
+  | n `mod` 3 == 0 = "Fizz"
+  | otherwise = show n
+
+main :: IO ()
+main = do
+  mapM_ (putStrLn . fizzBuzz) [1 .. 100]
+
+-- solution using State
+fizzbuzzList :: [Integer] -> [String]
+fizzbuzzList list =
+  execState (mapM_ addResult list) []
+
+addResult :: Integer -> State [String] ()
+addResult n =
+  get >>= \s ->
+    let result = fizzBuzz n : s
+     in put result
+
+main' :: IO ()
+main' = do
+  mapM_ putStrLn $
+    reverse $ fizzbuzzList [1 .. 100]
+
+-- solution using difference list instead of []
+fizzbuzzList' :: [Integer] -> DL.DList String
+fizzbuzzList' list =
+  execState (mapM_ addResult' list) DL.empty
+
+addResult' :: Integer -> State (DL.DList String) ()
+addResult' n = do
+  xs <- get
+  let result = fizzBuzz n
+  put (DL.snoc xs result)
+
+main'' :: IO ()
+main'' = do
+  mapM_ putStrLn $ fizzbuzzList' [1 .. 100]
