@@ -5,6 +5,7 @@ module Ch23Exercises where
 import Control.Applicative (liftA3)
 import Control.Monad (replicateM)
 import Control.Monad.Trans.State
+import Data.Functor.Identity
 import GhcPlugins (notNull)
 import System.Random
 
@@ -99,3 +100,36 @@ instance Monad (Moi s) where
     Moi $ \s ->
       let (a1, s') = f s
        in runMoi (k a1) s'
+
+-- FizzBuzzFromTo
+fizzBuzz :: Integer -> String
+fizzBuzz n
+  | n `mod` 15 == 0 = "FizzBuzz"
+  | n `mod` 5 == 0 = "Buzz"
+  | n `mod` 3 == 0 = "Fizz"
+  | otherwise = show n
+
+fizzBuzzFromTo :: Integer -> Integer -> [String]
+fizzBuzzFromTo from to = execState (mapM_ addResult [to, pred to .. from]) []
+
+addResult :: Integer -> State [String] ()
+addResult n =
+  get >>= \s -> put $ fizzBuzz n : s
+
+main :: IO ()
+main = mapM_ putStrLn $ fizzBuzzFromTo 1 10
+
+-- Chapter exercises
+-- 1. get
+get' :: State s s
+get' = state $ \s -> (s, s)
+
+-- 2. put
+put' :: s -> State s ()
+put' s = state $ const ((), s)
+
+-- 3. exec
+exec :: State s a -> s -> s
+exec (StateT sa) s =
+  let (Identity (a, s')) = sa s
+   in s'
